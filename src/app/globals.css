@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --bg-obsidian: #05070e;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-obsidian);
+  color: #f8fafc;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.14), transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.15), transparent 42%),
+    radial-gradient(circle at 50% 85%, rgba(14, 165, 233, 0.1), transparent 45%),
+    #05070e;
+  overflow-x: hidden;
+}
+
+.liquid-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(15, 23, 42, 0.55) 50%, rgba(255, 255, 255, 0.03) 100%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.liquid-glass-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.liquid-glass-hover:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 24px 60px rgba(56, 189, 248, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.glow-btn {
+  background: linear-gradient(135deg, #38bdf8, #818cf8 50%, #a855f7);
+  box-shadow: 0 0 28px rgba(56, 189, 248, 0.35);
+  transition: all 0.3s ease;
+}
+
+.glow-btn:hover {
+  box-shadow: 0 0 42px rgba(168, 85, 247, 0.55);
+  transform: translateY(-1px);
+}
+
+.grid-backdrop {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
