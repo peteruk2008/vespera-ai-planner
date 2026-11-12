@@ -846,4 +846,4 @@ jobs:
           git config user.email "bot@vespera.ai"
           git add -A
           git diff --cached --quiet || git commit -m "Add Vespera Part 1"
-          git push. 
+          git push
