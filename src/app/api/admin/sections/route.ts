@@ -1,0 +1,9 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
+const Schema = z.object({ id: z.string().optional(), key: z.string().min(2).max(60), title: z.string().min(1).max(140), subtitle: z.string().max(250).default(""), content: z.string().min(1), badge: z.string().max(40).nullable().optional(), imageUrl: z.string().nullable().optional(), sortOrder: z.number().int().default(0), published: z.boolean().default(true) });
+export async function GET() { try { await requireAdmin(); return NextResponse.json({ sections: await prisma.siteSection.findMany({ orderBy: { sortOrder: "asc" } }) }); } catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); } }
+export async function POST(req: Request) { try { await requireAdmin(); const { id: _id, ...data } = Schema.parse(await req.json()); return NextResponse.json({ section: await prisma.siteSection.create({ data }) }, { status: 201 }); } catch { return NextResponse.json({ error: "Failed" }, { status: 400 }); } }
+export async function PUT(req: Request) { try { await requireAdmin(); const { id, ...rest } = Schema.parse(await req.json()); if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 }); return NextResponse.json({ section: await prisma.siteSection.update({ where: { id }, data: rest }) }); } catch { return NextResponse.json({ error: "Failed" }, { status: 400 }); } }
+export async function DELETE(req: Request) { try { await requireAdmin(); const id = new URL(req.url).searchParams.get("id"); if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 }); await prisma.siteSection.delete({ where: { id } }); return NextResponse.json({ ok: true }); } catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); } }

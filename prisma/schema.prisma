@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum TaskCategory {
+  WORK
+  STUDY
+  HEALTH
+  PERSONAL
+  BREAK
+  FREE_TIME
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(USER)
+  timezone     String        @default("UTC")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tasks        Task[]
+  chatMessages ChatMessage[]
+}
+
+model Task {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  description     String       @default("")
+  date            String
+  startTime       String
+  endTime         String
+  durationMinutes Int
+  priority        Priority     @default(MEDIUM)
+  category        TaskCategory @default(WORK)
+  status          TaskStatus   @default(PENDING)
+  isBreak         Boolean      @default(false)
+  sortOrder       Int          @default(0)
+  aiGenerated     Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId, date])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model SiteSettings {
+  id              String   @id @default("singleton")
+  siteName        String   @default("Vespera")
+  tagline         String   @default("Autonomous Intelligence for Your Daily Architecture")
+  heroTitle       String   @default("Design Your Day With Liquid Precision")
+  heroSubtitle    String   @default("Describe your goals in plain language. Vespera orchestrates deep work, recovery breaks, and personal priorities into a balanced living schedule.")
+  heroCtaText     String   @default("Launch AI Planner")
+  accentColor     String   @default("#38bdf8")
+  secondaryColor  String   @default("#a855f7")
+  footerText      String   @default("© 2026 Vespera Intelligence Labs. Crafted for peak human rhythm.")
+  maintenanceMode Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model SiteSection {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String
+  subtitle  String   @default("")
+  content   String
+  imageUrl  String?
+  badge     String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  summary   String   @default("")
+  content   String
+  heroImage String?
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectShowcase {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  description String
+  imageUrl    String?
+  linkUrl     String?
+  featured    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  url          String   @unique
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+}
+
+model VisitorEvent {
+  id        String   @id @default(cuid())
+  path      String
+  visitorId String
+  referrer  String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+}
