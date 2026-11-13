@@ -1,42 +1,61 @@
-"use client";
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { GlassCard } from "@/components/ui/GlassCard";
+'use client';
+import React, { useState } from 'react';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [prompt, setPrompt] = useState('');
+  const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); setError("");
-    const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) { setError(data.error || "Sign in failed"); return; }
-    router.push(data.user.role === "ADMIN" ? "/admin" : "/planner");
-    router.refresh();
-  }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/ai/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      setTasks(data.tasks || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <GlassCard className="w-full max-w-md p-8 space-y-6" hover={false}>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Welcome Back to Vespera</h1>
-          <p className="text-sm text-slate-400 mt-1">Sign in to access your AI planner and analytics.</p>
-        </div>
-        {error && <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-xs text-rose-200">{error}</div>}
-        <form onSubmit={onSubmit} className="space-y-4">
-          <input type="email" required placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-sky-400" />
-          <input type="password" required placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-sky-400" />
-          <button disabled={loading} className="w-full glow-btn py-3 rounded-xl font-medium text-white cursor-pointer disabled:opacity-50">{loading ? "Authenticating..." : "Sign In"}</button>
+    <div style={{ minHeight: '100vh', background: '#090d16', color: '#fff', padding: '30px', fontFamily: 'sans-serif', direction: 'rtl' }}>
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '10px', color: '#38bdf8' }}>⚡ Vespera Skill Tree</h1>
+        <p style={{ color: '#94a3b8', marginBottom: '25px' }}>نظام شبكة المهام الذهنية وتصنيف الصعوبة أوتوماتيكياً (من E إلى S)</p>
+        
+        <form onSubmit={handleGenerate} style={{ background: '#111827', padding: '20px', borderRadius: '12px', border: '1px solid #1f2937', marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>اكتب هدفك أو مهمتك اليومية:</label>
+          <input 
+            type="text" 
+            value={prompt} 
+            onChange={(e) => setPrompt(e.target.value)} 
+            placeholder="مثال: تطوير تطبيق الويب وإصلاح الأخطاء..."
+            style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#1f2937', border: '1px solid #374151', color: '#fff', marginBottom: '15px', outline: 'none' }}
+          />
+          <button type="submit" style={{ width: '100%', padding: '12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+            {loading, ... ? 'جاري التوزيع في الشبكة...' : 'توليد شبكة المهام الذهنية'}
+          </button>
         </form>
-        <p className="text-xs text-center text-slate-400">New to Vespera? <Link href="/register" className="text-sky-400 hover:underline">Create an account</Link></p>
-      </GlassCard>
+
+        {tasks.length > 0 && (
+          <div style={{ background: '#111827', padding: '20px', borderRadius: '12px', border: '1px solid #1f2937' }}>
+            <h3 style={{ color: '#38bdf8', marginBottom: '15px' }}>مستويات شبكة المهام:</h3>
+            {tasks.map((t, index) => (
+              <div key={index} style={{ background: '#1f2937', padding: '12px', borderRadius: '8px', marginBottom: '10px', borderRight: '4px solid #3b82f6' }}>
+                <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold' }}>{t.time}</span>
+                <p style={{ margin: '5px 0 0 0', color: '#e2e8f0' }}>{t.task}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
