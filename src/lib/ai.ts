@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 
 export const AiTaskSchema = z.object({
@@ -34,8 +34,7 @@ export async function generateDailySchedule(params: {
   const ai = getGeminiClient();
   const systemPrompt = `You are Vespera, an elite cognitive productivity architect.
 Design a realistic, conflict-free daily schedule for ${params.date}.
-Return ONLY valid JSON matching this schema: {"summary": "...", "coachNote": "...", "tasks": [{"title": "...", "description": "...", "startTime": "HH:MM", "endTime": "HH:MM", "durationMinutes": 30, "priority": "MEDIUM", "category": "WORK", "isBreak": false}]}.
-Rules: Insert 10-20m breaks after deep focus, include meals/rest, no overlaps, chronological order.`;
+Return ONLY valid JSON matching this schema: {"summary": "...", "coachNote": "...", "tasks": [{"title": "...", "description": "...", "startTime": "HH:MM", "endTime": "HH:MM", "durationMinutes": 30, "priority": "MEDIUM", "category": "WORK", "isBreak": false}]}.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
@@ -45,7 +44,7 @@ Rules: Insert 10-20m breaks after deep focus, include meals/rest, no overlaps, c
     },
   });
 
-  const raw = response.text();
+  const raw = response.text;
   if (!raw) throw new Error('Empty AI response');
   return AiScheduleResponseSchema.parse(JSON.parse(raw));
 }
@@ -61,13 +60,13 @@ export async function refineDailySchedule(params: {
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `${systemPrompt}\n\nHistory: ${JSON.stringify(params.history)}\nCurrent Tasks: ${JSON.stringify(params.currentTasks)}\nEdit Instruction: ${params.instruction}`,
+    contents: `${systemPrompt}\n\nCurrent Tasks: ${JSON.stringify(params.currentTasks)}\nEdit Instruction: ${params.instruction}`,
     config: {
       responseMimeType: 'application/json',
     },
   });
 
-  const raw = response.text();
+  const raw = response.text;
   if (!raw) throw new Error('Empty AI response');
   return z.object({ reply: z.string(), tasks: z.array(AiTaskSchema).min(1) }).parse(JSON.parse(raw));
 }
